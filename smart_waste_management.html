@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Public Waste Management System | AI-Powered Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for interactive analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.15); }
+    }
+    .bounding-box {
+      border: 2px solid #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      position: absolute;
+      animation: boxPulse 1.5s infinite alternate;
+    }
+    @keyframes boxPulse {
+      0% { border-color: #ef4444; }
+      100% { border-color: #f59e0b; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-green-100 selection:text-green-900">
+
+  <!-- TOP GLOBAL HEADER & NAVIGATION BAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Logo & Title -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('landing')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-white shadow-md shadow-green-700/20">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+              <path d="M12 11v6"></path>
+              <path d="M9 14l3-3 3 3" stroke="#86efac"></path>
+              <circle cx="19" cy="4" r="2" fill="#4ade80" stroke="none"></circle>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-slate-900 text-lg tracking-tight">EcoGuard<span class="text-green-600">IoT</span></span>
+              <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Demo Ready</span>
+            </div>
+            <p class="text-[11px] text-slate-500 hidden sm:block">AI-Powered Animal-Resistant Waste Platform</p>
+          </div>
+        </div>
+
+        <!-- Main Navigation Tabs -->
+        <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+          <button onclick="switchView('landing')" id="nav-landing" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-green-700 bg-green-50">Home</button>
+          <button onclick="switchView('live')" id="nav-live" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100">Live Bins</button>
+          <button onclick="switchView('report')" id="nav-report" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100">Report Waste</button>
+          <button onclick="switchView('track')" id="nav-track" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100">Track Issue</button>
+          <button onclick="switchView('admin')" id="nav-admin" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center space-x-1">
+            <span>Admin Console</span>
+            <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded font-mono">Role</span>
+          </button>
+          <button onclick="switchView('worker')" id="nav-worker" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100">Sanitation Worker</button>
+        </nav>
+
+        <!-- Right Side: Simulation Status & Quick Role Switcher -->
+        <div class="flex items-center space-x-3">
+          <div class="hidden sm:flex items-center space-x-2 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full text-xs text-slate-600">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+            <span class="font-medium">IoT Stream: Active</span>
+          </div>
+          
+          <button onclick="toggleQuickRoleModal()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center space-x-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span id="current-role-badge">Switch View</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Main View Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- VIEW 1: PUBLIC LANDING PAGE -->
+    <section id="view-landing" class="view-content space-y-12">
+      <div class="relative bg-gradient-to-br from-slate-900 via-green-950 to-slate-900 text-white rounded-3xl p-8 sm:p-14 overflow-hidden shadow-xl border border-green-900/40">
+        <div class="relative z-10 max-w-3xl space-y-6">
+          <div class="inline-flex items-center space-x-2 bg-green-500/20 border border-green-500/30 px-3 py-1 rounded-full text-xs font-semibold text-green-300">
+            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+            <span>Smart Public Waste Management Platform</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+            Smarter Waste Management for <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300">Cleaner Public Spaces</span>
+          </h1>
+
+          <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+            Monitor waste levels in real-time, identify stray animal intrusion, prevent garbage scattering with automated motorized lids, and dispatch intelligent collection routes through an integrated IoT and AI command system.
+          </p>
+
+          <div class="flex flex-wrap gap-4 pt-2">
+            <button onclick="switchView('admin')" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-green-500/25 transition flex items-center space-x-2">
+              <span>Open Admin Command Center</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+            <button onclick="switchView('report')" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3.5 rounded-xl border border-white/20 transition flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <span>Report an Issue</span>
+            </button>
+            <button onclick="switchView('live')" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3.5 rounded-xl border border-white/20 transition">
+              View Public Live Map
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-10 pt-8 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs text-slate-300 font-mono">
+          <div><span class="text-green-400 block font-sans font-bold text-sm">IoT Telemetry</span> Ultrasonic HC-SR04</div>
+          <div><span class="text-green-400 block font-sans font-bold text-sm">Animal Vision</span> Edge AI YOLOv8 Mock</div>
+          <div><span class="text-green-400 block font-sans font-bold text-sm">Motorized Lid</span> Servo Anti-Pinch Lock</div>
+          <div><span class="text-green-400 block font-sans font-bold text-sm">Dispatch Engine</span> Smart Zone Clustering</div>
+        </div>
+      </div>
+
+      <!-- Live Statistics Counter -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Registered Bins</div>
+          <div class="text-3xl font-extrabold text-slate-900 mt-2" id="stat-total-bins">10</div>
+          <div class="text-xs text-green-600 mt-1">4 Municipal Sectors</div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Requiring Collection</div>
+          <div class="text-3xl font-extrabold text-amber-600 mt-2" id="stat-warning-bins">2</div>
+          <div class="text-xs text-slate-500 mt-1">&ge; 70% threshold</div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Animal Alerts</div>
+          <div class="text-3xl font-extrabold text-red-600 mt-2" id="stat-animal-alerts">1</div>
+          <div class="text-xs text-slate-500 mt-1">Automatic lid locked</div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Citizen Reports</div>
+          <div class="text-3xl font-extrabold text-blue-600 mt-2" id="stat-citizen-reports">3</div>
+          <div class="text-xs text-slate-500 mt-1">Trackable by ticket</div>
+        </div>
+      </div>
+
+      <!-- 7-Step How It Works -->
+      <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">How the Smart System Operates</h2>
+          <p class="text-slate-500 text-sm mt-1">End-to-end hardware-software pipeline from citizen disposal to automated logistics.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-7 gap-3">
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-green-700">1</span><h4 class="font-bold text-sm text-slate-800 mt-2">Disposal</h4><p class="text-xs text-slate-500 mt-1">Citizens dispose waste in smart bin.</p></div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-blue-700">2</span><h4 class="font-bold text-sm text-slate-800 mt-2">Sensors</h4><p class="text-xs text-slate-500 mt-1">Ultrasonic measures fill & depth.</p></div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-purple-700">3</span><h4 class="font-bold text-sm text-slate-800 mt-2">Threshold</h4><p class="text-xs text-slate-500 mt-1">Auto-flags bins at &ge; 70%.</p></div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-red-700">4</span><h4 class="font-bold text-sm text-slate-800 mt-2">AI Vision</h4><p class="text-xs text-slate-500 mt-1">Detects animal & locks lid.</p></div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-amber-700">5</span><h4 class="font-bold text-sm text-slate-800 mt-2">Alerts</h4><p class="text-xs text-slate-500 mt-1">Pushes warning to workers.</p></div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-emerald-700">6</span><h4 class="font-bold text-sm text-slate-800 mt-2">Collection</h4><p class="text-xs text-slate-500 mt-1">Sanitation team pickup.</p></div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-slate-700">7</span><h4 class="font-bold text-sm text-slate-800 mt-2">Reset</h4><p class="text-xs text-slate-500 mt-1">Bin resets fill to 0%.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: PUBLIC LIVE MONITORING -->
+    <section id="view-live" class="view-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">Public Live Telemetry Map & Bin Grid</h2>
+          <p class="text-slate-500 text-sm">Real-time sensor telemetry streaming from all smart bins across municipal sectors.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <select id="filter-zone" onchange="renderBinsGrid()" class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700">
+            <option value="ALL">All Sectors</option>
+            <option value="City Center">Sector 1: City Center</option>
+            <option value="Market Yard">Sector 2: Market Yard</option>
+            <option value="Green Park">Sector 3: Green Park</option>
+            <option value="Industrial">Sector 4: Industrial Estate</option>
+          </select>
+          <select id="filter-status" onchange="renderBinsGrid()" class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700">
+            <option value="ALL">All Statuses</option>
+            <option value="NORMAL">Normal (0-69%)</option>
+            <option value="WARNING">Warning (70-89%)</option>
+            <option value="CRITICAL">Critical (90-100%)</option>
+          </select>
+        </div>
+      </div>
+      <div id="bins-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- VIEW 3: CITIZEN REPORT FORM -->
+    <section id="view-report" class="view-content hidden max-w-2xl mx-auto space-y-6">
+      <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <span class="text-xs font-bold text-green-600 uppercase tracking-wider">Citizen Reporting Desk</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Report a Public Waste Issue</h2>
+          <p class="text-slate-500 text-sm mt-1">Help the sanitation department maintain public hygiene. Reports receive an instant tracking ticket.</p>
+        </div>
+
+        <form id="citizen-report-form" onsubmit="handleCitizenReportSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Issue Category *</label>
+            <select id="report-category" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800">
+              <option value="OVERFLOWING_BIN">Overflowing Smart Bin</option>
+              <option value="ANIMAL_SCATTERING">Animal Intrusion / Scattered Waste</option>
+              <option value="DAMAGED_LID">Damaged Motorized Lid / Sensor Fault</option>
+              <option value="ILLEGAL_DUMPING">Illegal Open Dumping</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Location / Sector *</label>
+              <select id="report-location" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800">
+                <option value="City Center - Main Plaza">City Center - Main Plaza (BIN-001)</option>
+                <option value="City Center - Metro Station">City Center - Metro Station (BIN-002)</option>
+                <option value="Market Yard - Gate 1">Market Yard - Gate 1 (BIN-003)</option>
+                <option value="Market Yard - Fish Market">Market Yard - Fish Market (BIN-004)</option>
+                <option value="Green Park - Joggers Path">Green Park - Joggers Path (BIN-005)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">GPS Coordinates</label>
+              <div class="flex space-x-2">
+                <input type="text" id="report-coords" readonly value="12.9716° N, 77.5946° E" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-600">
+                <button type="button" onclick="autoDetectGPS()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 rounded-xl font-medium">GPS</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Detailed Description *</label>
+            <textarea id="report-desc" required rows="3" placeholder="Describe the issue, scattered waste, or animal presence..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Your Name</label>
+              <input type="text" id="report-name" value="Rohit Citizen" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Contact Phone</label>
+              <input type="tel" id="report-phone" value="+91 98765 43210" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-md transition">
+            Submit Waste Report & Generate Ticket
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 4: TRACK REPORT STATUS -->
+    <section id="view-track" class="view-content hidden max-w-3xl mx-auto space-y-6">
+      <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <span class="text-xs font-bold text-green-600 uppercase tracking-wider">Citizen Transparency Portal</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Track Incident Resolution</h2>
+          <p class="text-slate-500 text-sm mt-1">Enter your tracking ticket number to view resolution audit logs.</p>
+        </div>
+
+        <div class="flex space-x-3">
+          <input type="text" id="track-ticket-input" placeholder="e.g. RPT-7701 or RPT-8492" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono uppercase">
+          <button onclick="handleTrackTicket()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl transition">
+            Track
+          </button>
+        </div>
+
+        <div class="flex items-center space-x-2 text-xs text-slate-500">
+          <span>Try quick sample:</span>
+          <button onclick="setTrackTicket('RPT-7701')" class="underline hover:text-green-700 font-mono">RPT-7701</button>
+          <span>•</span>
+          <button onclick="setTrackTicket('RPT-7702')" class="underline hover:text-green-700 font-mono">RPT-7702</button>
+        </div>
+
+        <div id="track-result-box" class="pt-6 border-t border-slate-100 hidden"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: ADMIN COMMAND CENTER -->
+    <section id="view-admin" class="view-content hidden space-y-6">
+      <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-2 text-xs font-semibold">
+        <button onclick="switchAdminSubtab('overview')" id="admin-sub-overview" class="admin-subtab px-3.5 py-2 rounded-xl bg-green-600 text-white">Dashboard Overview</button>
+        <button onclick="switchAdminSubtab('bins')" id="admin-sub-bins" class="admin-subtab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">Smart Bins Inventory</button>
+        <button onclick="switchAdminSubtab('animal')" id="admin-sub-animal" class="admin-subtab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center space-x-1.5">
+          <span>AI Animal Detection</span>
+          <span class="w-2 h-2 rounded-full bg-red-500"></span>
+        </button>
+        <button onclick="switchAdminSubtab('collection')" id="admin-sub-collection" class="admin-subtab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">Collection Dispatch</button>
+        <button onclick="switchAdminSubtab('simulator')" id="admin-sub-simulator" class="admin-subtab px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center space-x-1">
+          <span>IoT Testbench & Simulator</span>
+        </button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div id="admin-tab-overview" class="admin-tab-content space-y-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase">Operational Bins</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1">10 / 10 Active</div>
+            <div class="text-xs text-green-600 mt-2 font-medium">100% Device Health</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase">Avg Municipal Fill</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1" id="admin-avg-fill">58.4%</div>
+            <div class="text-xs text-slate-500 mt-2">2 Bins require immediate pickup</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase">Animal Intrusions Thwarted</span>
+            <div class="text-2xl font-extrabold text-red-600 mt-1">18 Today</div>
+            <div class="text-xs text-slate-500 mt-2">Auto-lid locked in &lt;300ms</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase">Collection Efficiency</span>
+            <div class="text-2xl font-extrabold text-emerald-600 mt-1">94.8%</div>
+            <div class="text-xs text-slate-500 mt-2">+32% fuel reduction</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-slate-900">7-Day Waste Collection Tonnage (Tons)</h3>
+            <div class="h-64"><canvas id="chart-tonnage"></canvas></div>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-slate-900">Sector Fill Level Distribution</h3>
+            <div class="h-64"><canvas id="chart-distribution"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bins Inventory Tab -->
+      <div id="admin-tab-bins" class="admin-tab-content hidden space-y-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 text-lg">Smart Bins Operational Inventory</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-xs border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-4">Bin ID / Name</th>
+                  <th class="py-3 px-4">Sector</th>
+                  <th class="py-3 px-4">Fill %</th>
+                  <th class="py-3 px-4">Lid State</th>
+                  <th class="py-3 px-4">Temp / Battery</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-bins-table-body" class="divide-y divide-slate-100 font-mono text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Animal Vision Tab -->
+      <div id="admin-tab-animal" class="admin-tab-content hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-slate-900 text-xl">AI-Assisted Animal Intrusion Detection</h3>
+              <p class="text-xs text-slate-500">Live simulated camera feed with animal detection bounding box & automatic lid locking.</p>
+            </div>
+            <button onclick="simulateAnimalIntrusionEvent()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition">
+              Simulate Animal Approach Now
+            </button>
+          </div>
+
+          <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-video max-w-2xl mx-auto border border-slate-800 shadow-inner flex flex-col justify-between p-4 text-white">
+            <div class="flex justify-between items-center text-xs">
+              <span class="bg-red-600 text-white font-mono font-bold px-2 py-0.5 rounded flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-white pulse-dot"></span>
+                <span>LIVE • CAM-03 (Market Yard Gate 1)</span>
+              </span>
+              <span class="font-mono text-slate-400">1080p AI Inference</span>
+            </div>
+
+            <div class="bounding-box rounded-lg" style="top: 25%; left: 30%; width: 45%; height: 50%;">
+              <div class="bg-red-600 text-white text-[10px] font-mono font-bold px-2 py-0.5 w-fit rounded-br">
+                Canis lupus (Stray Dog): 95.4% Conf
+              </div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 text-xs flex justify-between items-center">
+              <div class="text-amber-400 font-semibold">
+                Actuator: MOTORIZED LID LOCKED (Deterrent Active)
+              </div>
+              <span class="text-slate-400 text-[10px] font-mono">Distance: 0.8m</span>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-slate-900 text-sm mb-2">Detection Incident Log</h4>
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b border-slate-200">
+                  <tr>
+                    <th class="py-2.5 px-3">Timestamp</th>
+                    <th class="py-2.5 px-3">Bin Camera</th>
+                    <th class="py-2.5 px-3">Species Detected</th>
+                    <th class="py-2.5 px-3">AI Confidence</th>
+                    <th class="py-2.5 px-3">Safety Action</th>
+                  </tr>
+                </thead>
+                <tbody id="animal-logs-table-body" class="divide-y divide-slate-100 font-mono"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collection Dispatch Tab -->
+      <div id="admin-tab-collection" class="admin-tab-content hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+          <h3 class="font-bold text-slate-900 text-lg">Active Collection Routes</h3>
+          <div id="collection-tasks-list" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- Simulator Controls Tab -->
+      <div id="admin-tab-simulator" class="admin-tab-content hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+          <h3 class="font-bold text-slate-900 text-xl">IoT Simulation & Testbench</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">Scenario 1: High Dumping Surge</h4>
+              <p class="text-xs text-slate-500">Pushes bins straight to 95% full to trigger warning sirens.</p>
+              <button onclick="injectScenarioDumpingSurge()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                Simulate Overflow Surge
+              </button>
+            </div>
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">Scenario 2: Stray Animal Raid</h4>
+              <p class="text-xs text-slate-500">Simulates animals approaching, triggers automatic lid locks.</p>
+              <button onclick="simulateAnimalIntrusionEvent()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                Trigger Animal Raid
+              </button>
+            </div>
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-sm text-slate-800">Scenario 3: Sanitation Sweep</h4>
+              <p class="text-xs text-slate-500">Empties all bins to 0% with cleaned audit logs.</p>
+              <button onclick="emptyAllBins()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                Empty All 10 Bins
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 6: SANITATION WORKER PORTAL -->
+    <section id="view-worker" class="view-content hidden max-w-4xl mx-auto space-y-6">
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">🚛</div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 class="text-xl font-bold text-slate-900">Ramesh Kumar</h2>
+                <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">On Duty</span>
+              </div>
+              <p class="text-xs text-slate-500">Vehicle #DL-04-WASTE-22 • Sector 1 & Sector 2 Route</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block font-mono">Assigned Tasks</span>
+            <span class="text-2xl font-extrabold text-slate-900" id="worker-assigned-count">2 Pending</span>
+          </div>
+        </div>
+        <div id="worker-pickup-cards" class="space-y-3"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Quick Role Switcher Modal -->
+  <div id="modal-role-switcher" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-slate-900 text-lg">Switch Demo Role</h3>
+        <button onclick="toggleQuickRoleModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+      </div>
+      <div class="space-y-2">
+        <button onclick="selectRole('admin')" class="w-full text-left p-3.5 rounded-2xl border border-slate-200 hover:bg-green-50 transition">
+          <div class="font-bold text-sm text-slate-900">Municipal Administrator</div>
+          <div class="text-xs text-slate-500">Full telemetry, lid actuators, AI feeds, and dispatch</div>
+        </button>
+        <button onclick="selectRole('worker')" class="w-full text-left p-3.5 rounded-2xl border border-slate-200 hover:bg-green-50 transition">
+          <div class="font-bold text-sm text-slate-900">Sanitation Worker</div>
+          <div class="text-xs text-slate-500">Driver route view, one-tap bin pickup verification</div>
+        </button>
+        <button onclick="selectRole('citizen')" class="w-full text-left p-3.5 rounded-2xl border border-slate-200 hover:bg-green-50 transition">
+          <div class="font-bold text-sm text-slate-900">Citizen / Public</div>
+          <div class="text-xs text-slate-500">Live public map, incident reporting, resolution tracking</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bin Detail Modal -->
+  <div id="modal-bin-inspector" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-xs font-bold text-green-600 font-mono" id="modal-bin-id">BIN-001</span>
+          <h3 class="font-bold text-slate-900 text-lg" id="modal-bin-name">City Center</h3>
+        </div>
+        <button onclick="closeBinModal()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+      </div>
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500 font-medium">Fill Capacity</span>
+          <span class="font-bold font-mono text-sm" id="modal-bin-fill">65%</span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+          <div id="modal-bin-progress" class="bg-green-500 h-3 rounded-full" style="width: 65%"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-xs pt-2">
+          <div class="p-2 bg-white rounded-xl border border-slate-200"><span class="text-slate-400 block text-[10px]">TEMP</span><span class="font-bold font-mono" id="modal-bin-temp">28°C</span></div>
+          <div class="p-2 bg-white rounded-xl border border-slate-200"><span class="text-slate-400 block text-[10px]">BATTERY</span><span class="font-bold font-mono" id="modal-bin-battery">92%</span></div>
+          <div class="p-2 bg-white rounded-xl border border-slate-200"><span class="text-slate-400 block text-[10px]">LID</span><span class="font-bold font-mono text-green-700" id="modal-bin-lid">CLOSED</span></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="actuateModalBin('OPEN')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs">Open Lid</button>
+        <button onclick="actuateModalBin('CLOSE')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs">Close Lid</button>
+        <button onclick="actuateModalBin('EMPTY')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl text-xs">Mark Emptied</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-800">Smart Public Waste Management System</span>
+        <span>•</span>
+        <span>College Capstone Engineering Project</span>
+      </div>
+      <span>Full-Stack IoT Architecture • Standalone Edition</span>
+    </div>
+  </footer>
+
+  <script>
+    const DEFAULT_BINS = [
+      { id: "BIN-001", name: "City Center - Main Plaza", zone: "City Center", capacity: 200, fill: 45, temp: 27, battery: 94, lid: "CLOSED", worker: "Ramesh Kumar" },
+      { id: "BIN-002", name: "Metro Station Exit A", zone: "City Center", capacity: 240, fill: 78, temp: 29, battery: 88, lid: "CLOSED", worker: "Ramesh Kumar" },
+      { id: "BIN-003", name: "Market Yard - Gate 1", zone: "Market Yard", capacity: 300, fill: 92, temp: 31, battery: 82, lid: "LOCKED_ANIMAL", worker: "Suresh Patil" },
+      { id: "BIN-004", name: "Fish & Vegetable Market", zone: "Market Yard", capacity: 300, fill: 86, temp: 32, battery: 79, lid: "LOCKED_ANIMAL", worker: "Suresh Patil" },
+      { id: "BIN-005", name: "Green Park - Joggers Track", zone: "Green Park", capacity: 150, fill: 35, temp: 25, battery: 96, lid: "CLOSED", worker: "Anil Sharma" },
+      { id: "BIN-006", name: "Green Park - Children Corner", zone: "Green Park", capacity: 150, fill: 50, temp: 26, battery: 95, lid: "CLOSED", worker: "Anil Sharma" },
+      { id: "BIN-007", name: "Industrial Estate - Sector 4", zone: "Industrial", capacity: 500, fill: 68, temp: 33, battery: 85, lid: "CLOSED", worker: "Ramesh Kumar" },
+      { id: "BIN-008", name: "Industrial Warehouses Gate", zone: "Industrial", capacity: 500, fill: 94, temp: 34, battery: 76, lid: "CLOSED", worker: "Ramesh Kumar" },
+      { id: "BIN-009", name: "Commercial Street Cross", zone: "City Center", capacity: 200, fill: 62, temp: 28, battery: 90, lid: "CLOSED", worker: "Suresh Patil" },
+      { id: "BIN-010", name: "Lake Promenade Viewpoint", zone: "Green Park", capacity: 180, fill: 28, temp: 24, battery: 98, lid: "CLOSED", worker: "Anil Sharma" }
+    ];
+
+    const DEFAULT_REPORTS = [
+      { id: "RPT-7701", category: "OVERFLOWING_BIN", location: "Market Yard - Gate 1", citizen: "Rohit Citizen", phone: "+91 98765 43210", status: "ASSIGNED", date: "Today, 10:15 AM", desc: "Garbage is overflowing from top opening onto sidewalk." },
+      { id: "RPT-7702", category: "ANIMAL_SCATTERING", location: "Fish & Vegetable Market", citizen: "Pooja Verma", phone: "+91 98111 22334", status: "RESOLVED", date: "Yesterday, 04:30 PM", desc: "Stray dogs attempted to rummage, lid locked automatically." },
+      { id: "RPT-7703", category: "DAMAGED_LID", location: "Metro Station Exit A", citizen: "Karan Johar", phone: "+91 98440 55667", status: "PENDING", date: "Today, 12:45 PM", desc: "Sensor blinking warning amber light." }
+    ];
+
+    const DEFAULT_ANIMAL_LOGS = [
+      { time: "Just now", bin: "BIN-003 (Market Gate 1)", species: "Canis lupus (Stray Dog)", conf: "95.4%", action: "Motorized Lid Locked + Buzzer Alert" },
+      { time: "18m ago", bin: "BIN-004 (Fish Market)", species: "Macaca mulatta (Monkey)", conf: "89.1%", action: "Motorized Lid Locked" }
+    ];
+
+    let appState = {
+      bins: JSON.parse(localStorage.getItem('smartwaste_bins')) || DEFAULT_BINS,
+      reports: JSON.parse(localStorage.getItem('smartwaste_reports')) || DEFAULT_REPORTS,
+      animalLogs: JSON.parse(localStorage.getItem('smartwaste_animalLogs')) || DEFAULT_ANIMAL_LOGS,
+      simRunning: true,
+      currentRole: 'public',
+      selectedModalBinId: null
+    };
+
+    function saveState() {
+      localStorage.setItem('smartwaste_bins', JSON.stringify(appState.bins));
+      localStorage.setItem('smartwaste_reports', JSON.stringify(appState.reports));
+      localStorage.setItem('smartwaste_animalLogs', JSON.stringify(appState.animalLogs));
+    }
+
+    function switchView(viewName) {
+      document.querySelectorAll('.view-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-green-700', 'bg-green-50');
+        btn.classList.add('text-slate-600');
+      });
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      const activeNav = document.getElementById(`nav-${viewName}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-600');
+        activeNav.classList.add('text-green-700', 'bg-green-50');
+      }
+
+      if (viewName === 'live') renderBinsGrid();
+      if (viewName === 'admin') initAdminDashboard();
+      if (viewName === 'worker') renderWorkerPortal();
+    }
+
+    function switchAdminSubtab(tabName) {
+      document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.admin-subtab').forEach(btn => {
+        btn.classList.remove('bg-green-600', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-600');
+      });
+
+      const target = document.getElementById(`admin-tab-${tabName}`);
+      if (target) target.classList.remove('hidden');
+
+      const btn = document.getElementById(`admin-sub-${tabName}`);
+      if (btn) {
+        btn.classList.remove('bg-slate-100', 'text-slate-600');
+        btn.classList.add('bg-green-600', 'text-white');
+      }
+
+      if (tabName === 'overview') initCharts();
+      if (tabName === 'bins') renderAdminBinsTable();
+      if (tabName === 'animal') renderAnimalLogsTable();
+      if (tabName === 'collection') renderCollectionTasks();
+    }
+
+    function toggleQuickRoleModal() {
+      document.getElementById('modal-role-switcher').classList.toggle('hidden');
+    }
+
+    function selectRole(role) {
+      appState.currentRole = role;
+      document.getElementById('current-role-badge').innerText = role.toUpperCase();
+      toggleQuickRoleModal();
+      if (role === 'admin') switchView('admin');
+      else if (role === 'worker') switchView('worker');
+      else switchView('live');
+      showToast(`Switched view to ${role.toUpperCase()}`, 'info');
+    }
+
+    function renderBinsGrid() {
+      const grid = document.getElementById('bins-grid');
+      const zoneFilter = document.getElementById('filter-zone').value;
+      const statusFilter = document.getElementById('filter-status').value;
+      grid.innerHTML = '';
+
+      const filtered = appState.bins.filter(b => {
+        const matchesZone = (zoneFilter === 'ALL' || b.zone === zoneFilter);
+        let matchesStatus = true;
+        if (statusFilter === 'NORMAL') matchesStatus = b.fill < 70;
+        if (statusFilter === 'WARNING') matchesStatus = (b.fill >= 70 && b.fill < 90);
+        if (statusFilter === 'CRITICAL') matchesStatus = b.fill >= 90;
+        return matchesZone && matchesStatus;
+      });
+
+      filtered.forEach(bin => {
+        let badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        let barColor = 'bg-emerald-500';
+        let statusText = 'Normal';
+
+        if (bin.fill >= 90) {
+          badgeColor = 'bg-red-100 text-red-800 border-red-200';
+          barColor = 'bg-red-500';
+          statusText = 'Critical - Full';
+        } else if (bin.fill >= 70) {
+          badgeColor = 'bg-amber-100 text-amber-800 border-amber-200';
+          barColor = 'bg-amber-500';
+          statusText = 'Warning - Near Full';
+        }
+
+        const isAnimalLocked = (bin.lid === 'LOCKED_ANIMAL');
+        const card = document.createElement('div');
+        card.className = "bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs font-mono font-bold text-slate-400">${bin.id}</span>
+              <h3 class="font-bold text-slate-900 text-base">${bin.name}</h3>
+              <span class="text-xs text-slate-500">${bin.zone}</span>
+            </div>
+            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border ${badgeColor}">
+              ${statusText}
+            </span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-500">Fill Level</span>
+              <span class="font-bold text-slate-900">${bin.fill}%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div class="${barColor} h-2.5 rounded-full" style="width: ${bin.fill}%"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1 border-t border-slate-100">
+            <div><span class="text-slate-400 block text-[10px]">TEMP</span><span class="font-mono font-bold text-slate-700">${bin.temp}°C</span></div>
+            <div><span class="text-slate-400 block text-[10px]">BATTERY</span><span class="font-mono font-bold text-slate-700">${bin.battery}%</span></div>
+            <div><span class="text-slate-400 block text-[10px]">LID</span><span class="font-mono font-bold ${isAnimalLocked ? 'text-red-600' : 'text-slate-700'}">${bin.lid}</span></div>
+          </div>
+          <div class="pt-2 flex space-x-2">
+            <button onclick="openBinModal('${bin.id}')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 rounded-xl">Inspect</button>
+            <button onclick="quickEmptyBin('${bin.id}')" class="bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded-xl border border-green-200">Empty</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      updateOverviewStats();
+    }
+
+    function openBinModal(binId) {
+      const bin = appState.bins.find(b => b.id === binId);
+      if (!bin) return;
+      appState.selectedModalBinId = binId;
+      document.getElementById('modal-bin-id').innerText = bin.id;
+      document.getElementById('modal-bin-name').innerText = bin.name;
+      document.getElementById('modal-bin-fill').innerText = `${bin.fill}%`;
+      document.getElementById('modal-bin-temp').innerText = `${bin.temp}°C`;
+      document.getElementById('modal-bin-battery').innerText = `${bin.battery}%`;
+      document.getElementById('modal-bin-lid').innerText = bin.lid;
+      document.getElementById('modal-bin-progress').style.width = `${bin.fill}%`;
+      document.getElementById('modal-bin-inspector').classList.remove('hidden');
+    }
+
+    function closeBinModal() {
+      document.getElementById('modal-bin-inspector').classList.add('hidden');
+    }
+
+    function actuateModalBin(command) {
+      if (!appState.selectedModalBinId) return;
+      const bin = appState.bins.find(b => b.id === appState.selectedModalBinId);
+      if (!bin) return;
+      if (command === 'OPEN') bin.lid = 'OPEN';
+      else if (command === 'CLOSE') bin.lid = 'CLOSED';
+      else if (command === 'EMPTY') { bin.fill = 0; bin.lid = 'CLOSED'; }
+      saveState();
+      openBinModal(bin.id);
+      renderBinsGrid();
+      showToast(`Command ${command} sent to ${bin.id}`, 'info');
+    }
+
+    function quickEmptyBin(binId) {
+      const bin = appState.bins.find(b => b.id === binId);
+      if (bin) {
+        bin.fill = 0;
+        bin.lid = 'CLOSED';
+        saveState();
+        renderBinsGrid();
+        showToast(`Emptied ${bin.id}`, 'success');
+      }
+    }
+
+    function initAdminDashboard() {
+      renderAdminBinsTable();
+      initCharts();
+      updateOverviewStats();
+    }
+
+    function renderAdminBinsTable() {
+      const tbody = document.getElementById('admin-bins-table-body');
+      tbody.innerHTML = '';
+      appState.bins.forEach(bin => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-semibold text-slate-900">${bin.id}<br><span class="text-[11px] text-slate-500 font-sans">${bin.name}</span></td>
+          <td class="py-3 px-4 font-sans">${bin.zone}</td>
+          <td class="py-3 px-4"><span class="font-bold ${bin.fill >= 90 ? 'text-red-600' : (bin.fill >= 70 ? 'text-amber-600' : 'text-slate-800')}">${bin.fill}%</span></td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${bin.lid === 'LOCKED_ANIMAL' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-700'}">${bin.lid}</span></td>
+          <td class="py-3 px-4">${bin.temp}°C / ${bin.battery}%</td>
+          <td class="py-3 px-4 text-right space-x-1">
+            <button onclick="openBinModal('${bin.id}')" class="text-xs text-blue-600 hover:underline">Inspect</button>
+            <span>•</span>
+            <button onclick="quickEmptyBin('${bin.id}')" class="text-xs text-green-600 hover:underline">Empty</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAnimalLogsTable() {
+      const tbody = document.getElementById('animal-logs-table-body');
+      tbody.innerHTML = '';
+      appState.animalLogs.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-3 text-slate-400">${log.time}</td>
+          <td class="py-2 px-3 font-semibold text-slate-800">${log.bin}</td>
+          <td class="py-2 px-3 text-red-600">${log.species}</td>
+          <td class="py-2 px-3 font-bold">${log.conf}</td>
+          <td class="py-2 px-3 text-emerald-700">${log.action}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderCollectionTasks() {
+      const list = document.getElementById('collection-tasks-list');
+      list.innerHTML = '';
+      const criticalBins = appState.bins.filter(b => b.fill >= 70);
+      if (criticalBins.length === 0) {
+        list.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm">All bins are within optimal capacity (&lt; 70%).</div>`;
+        return;
+      }
+      criticalBins.forEach(bin => {
+        const item = document.createElement('div');
+        item.className = "p-4 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center";
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-mono font-bold text-slate-900">${bin.id}</span>
+              <span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">${bin.fill}% FULL</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-1">${bin.name} (${bin.zone})</p>
+          </div>
+          <button onclick="quickEmptyBin('${bin.id}'); renderCollectionTasks();" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-xl">
+            Confirm Pickup
+          </button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function renderWorkerPortal() {
+      const container = document.getElementById('worker-pickup-cards');
+      const assignedCount = document.getElementById('worker-assigned-count');
+      container.innerHTML = '';
+      const workerBins = appState.bins.filter(b => b.worker.includes("Ramesh") && b.fill >= 70);
+      assignedCount.innerText = `${workerBins.length} Pending`;
+
+      if (workerBins.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 font-bold">All Assigned Bins Cleared!</div>`;
+        return;
+      }
+
+      workerBins.forEach((bin, idx) => {
+        const card = document.createElement('div');
+        card.className = "p-5 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center";
+        card.innerHTML = `
+          <div>
+            <h4 class="font-bold text-slate-900">${bin.name}</h4>
+            <div class="text-xs text-slate-500 font-mono">${bin.id} • ${bin.zone} • ${bin.fill}% FULL</div>
+          </div>
+          <button onclick="quickEmptyBin('${bin.id}'); renderWorkerPortal();" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs">
+            Confirm Emptied (0%)
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function handleCitizenReportSubmit(e) {
+      e.preventDefault();
+      const cat = document.getElementById('report-category').value;
+      const loc = document.getElementById('report-location').value;
+      const desc = document.getElementById('report-desc').value;
+      const name = document.getElementById('report-name').value;
+      const phone = document.getElementById('report-phone').value;
+      const randomId = 'RPT-' + Math.floor(1000 + Math.random() * 9000);
+
+      const newReport = { id: randomId, category: cat, location: loc, citizen: name, phone: phone, status: "ASSIGNED", date: "Just now", desc: desc };
+      appState.reports.unshift(newReport);
+      saveState();
+      showToast(`Report ${randomId} submitted!`, 'success');
+      switchView('track');
+      setTrackTicket(randomId);
+    }
+
+    function setTrackTicket(ticketId) {
+      document.getElementById('track-ticket-input').value = ticketId;
+      handleTrackTicket();
+    }
+
+    function handleTrackTicket() {
+      const ticketId = document.getElementById('track-ticket-input').value.trim().toUpperCase();
+      const resBox = document.getElementById('track-result-box');
+      resBox.classList.remove('hidden');
+      const r = appState.reports.find(x => x.id === ticketId);
+
+      if (!r) {
+        resBox.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded-xl text-xs font-bold">Ticket ${ticketId} not found.</div>`;
+        return;
+      }
+
+      resBox.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs font-bold text-green-700 font-mono">${r.id}</span>
+              <h3 class="font-bold text-slate-900">${r.category}</h3>
+              <p class="text-xs text-slate-500">${r.location}</p>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 rounded-full ${r.status === 'RESOLVED' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span>
+          </div>
+          <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200">"${r.desc}"</p>
+        </div>
+      `;
+    }
+
+    function injectScenarioDumpingSurge() {
+      appState.bins[1].fill = 93;
+      appState.bins[3].fill = 96;
+      appState.bins[7].fill = 98;
+      saveState();
+      renderBinsGrid();
+      showToast("Heavy waste surge injected: 3 bins reached Critical threshold!", "error");
+    }
+
+    function simulateAnimalIntrusionEvent() {
+      const targetBin = appState.bins[2];
+      targetBin.lid = "LOCKED_ANIMAL";
+      appState.animalLogs.unshift({
+        time: "Just now",
+        bin: `${targetBin.id} (${targetBin.name})`,
+        species: "Canis lupus (Stray Dog)",
+        conf: "95.4%",
+        action: "Motorized Lid Locked + Safe Reverse"
+      });
+      saveState();
+      renderBinsGrid();
+      renderAnimalLogsTable();
+      showToast(`Animal intrusion detected at ${targetBin.id}! Lid locked.`, "error");
+    }
+
+    function emptyAllBins() {
+      appState.bins.forEach(b => { b.fill = 15; b.lid = "CLOSED"; });
+      saveState();
+      renderBinsGrid();
+      showToast("All bins emptied to 15% clean capacity.", "success");
+    }
+
+    function updateOverviewStats() {
+      const total = appState.bins.length;
+      const warning = appState.bins.filter(b => b.fill >= 70).length;
+      const animal = appState.bins.filter(b => b.lid === 'LOCKED_ANIMAL').length;
+      const reports = appState.reports.length;
+
+      if (document.getElementById('stat-total-bins')) document.getElementById('stat-total-bins').innerText = total;
+      if (document.getElementById('stat-warning-bins')) document.getElementById('stat-warning-bins').innerText = warning;
+      if (document.getElementById('stat-animal-alerts')) document.getElementById('stat-animal-alerts').innerText = animal;
+      if (document.getElementById('stat-citizen-reports')) document.getElementById('stat-citizen-reports').innerText = reports;
+      if (document.getElementById('admin-avg-fill')) {
+        const avg = Math.round(appState.bins.reduce((a, b) => a + b.fill, 0) / total);
+        document.getElementById('admin-avg-fill').innerText = `${avg}%`;
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      let border = 'border-emerald-500 bg-slate-900 text-white';
+      if (type === 'error') border = 'border-red-500 bg-slate-900 text-white';
+      toast.className = `p-3 rounded-xl border-l-4 shadow-xl text-xs font-medium pointer-events-auto flex items-center justify-between space-x-3 transition-all duration-300 ${border}`;
+      toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white">&times;</button>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    let tonnageChart, distChart;
+    function initCharts() {
+      const ctx1 = document.getElementById('chart-tonnage');
+      const ctx2 = document.getElementById('chart-distribution');
+      if (!ctx1 || !ctx2) return;
+      if (tonnageChart) tonnageChart.destroy();
+      if (distChart) distChart.destroy();
+
+      tonnageChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{ label: 'Tons Cleared', data: [4.2, 5.1, 4.8, 6.2, 5.9, 7.8, 6.4], backgroundColor: '#16a34a', borderRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      distChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Normal', 'Warning', 'Critical'],
+          datasets: [{
+            data: [
+              appState.bins.filter(b => b.fill < 70).length,
+              appState.bins.filter(b => b.fill >= 70 && b.fill < 90).length,
+              appState.bins.filter(b => b.fill >= 90).length
+            ],
+            backgroundColor: ['#22c55e', '#f59e0b', '#dc2626']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { renderBinsGrid(); });
+  </script>
+</body>
+</html>
